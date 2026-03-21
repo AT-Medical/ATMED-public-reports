@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "description": "Template for ATMED-private-reports/verification/report_index.json. Copy this file to the ATMED-private-reports repository at the path: verification/report_index.json and populate the 'reports' array as reports are migrated.",
+  "repository": "ATMED-public-reports",
+  "reference": "https://github.com/AT-Medical/ATMED-public-reports",
+  "last_updated": "2026-03-21",
+  "reports": [
+    {
+      "_comment": "Example entry — remove before using in ATMED-private-reports",
+      "id": "ATMED-ISSUE-COPILOT-2026-0001",
+      "type": "ISSUE",
+      "ai": "COPILOT",
+      "date": "2026-01-01",
+      "verification_code": "ATMED-VRF-XXXXXXXX",
+      "hash": "sha256:optional_sha256_hash_of_report_content",
+      "reference_path": "reports/issues/ATMED-ISSUE-COPILOT-2026-0001.md",
+      "source_repository": "ATMED-infrastructure",
+      "source_path": "original/path/in/source/repo.md",
+      "migrated_at": "2026-03-21T00:00:00Z",
+      "status": "migrated"
+    }
+  ]
+}
