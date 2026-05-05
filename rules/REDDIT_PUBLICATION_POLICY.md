@@ -12,15 +12,34 @@ Preferred English version:
 
 ```text
 Transparency note: This is an automatically generated incident report based on a real troubleshooting and remediation process performed with the assistance of ChatGPT. The summary was generated and prepared through GitHub by an automated worker and was published only after approval by the IT and Security department of AT Medical GmbH, Heidelberg.
+
+Organization: AT Medical GmbH, Heidelberg
+Website: https://www.at-medical.de
+Contact: Support@at-medical.de
 ```
 
 German source version:
 
 ```text
 Transparenzhinweis: Hierbei handelt es sich um einen automatisch generierten Incident Report auf Grundlage einer realen Fehlerbehebung mithilfe von ChatGPT. Die Zusammenfassung wurde über GitHub durch einen automatisierten Worker erstellt und erst nach Freigabe durch die Abteilung IT und Sicherheit der AT Medical GmbH, Heidelberg veröffentlicht.
+
+Organisation: AT Medical GmbH, Heidelberg
+Webseite: https://www.at-medical.de
+Kontakt: Support@at-medical.de
 ```
 
-The Reddit worker must refuse publication if the disclaimer is missing.
+The Reddit worker must refuse publication if the disclaimer, website, or contact address is missing.
+
+## Required Contact Information
+
+Every Reddit post must include:
+
+```text
+Website: https://www.at-medical.de
+Contact: Support@at-medical.de
+```
+
+The link to the full public GitHub report should remain in the report body itself.
 
 ## Recommendation
 
@@ -98,6 +117,9 @@ reddit:
   approved: true
   selected_subreddit: "r/..."
 mandatory_disclaimer: true
+organization:
+  website: "https://www.at-medical.de"
+  contact: "Support@at-medical.de"
 ```
 
 and the sanitization checklist is complete.
@@ -112,6 +134,11 @@ hashtags:
   - "#Docker"
   - "#iptables"
 mandatory_disclaimer: true
+organization:
+  name: "AT Medical GmbH"
+  location: "Heidelberg"
+  website: "https://www.at-medical.de"
+  contact: "Support@at-medical.de"
 reddit:
   status: "draft"
   approved: false
@@ -128,11 +155,12 @@ When approved, a worker may:
 
 1. validate sanitization metadata,
 2. validate mandatory disclaimer is present,
-3. validate selected subreddit,
-4. submit the post via Reddit API,
-5. store the posted URL in the draft metadata or a publication log,
-6. notify Andreas via NTFY.
+3. validate website and contact address are present,
+4. validate selected subreddit,
+5. submit the post via Reddit API,
+6. store the posted URL in the draft metadata or a publication log,
+7. notify Andreas via NTFY.
 
 ## Final Rule
 
-Prepare automatically. Publish only after explicit approval. Never publish without the mandatory transparency disclaimer.
+Prepare automatically. Publish only after explicit approval. Never publish without the mandatory transparency disclaimer, website, and contact address.
