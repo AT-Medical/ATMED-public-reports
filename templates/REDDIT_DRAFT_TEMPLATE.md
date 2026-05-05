@@ -11,6 +11,11 @@ tags:
 hashtags:
   - "#[Tag]"
 mandatory_disclaimer: true
+organization:
+  name: "AT Medical GmbH"
+  location: "Heidelberg"
+  website: "https://www.at-medical.de"
+  contact: "Support@at-medical.de"
 reddit:
   status: "draft"
   approved: false
@@ -40,12 +45,20 @@ This text must appear either at the beginning or as a footer of every Reddit pos
 
 ```text
 Transparency note: This is an automatically generated incident report based on a real troubleshooting and remediation process performed with the assistance of ChatGPT. The summary was generated and prepared through GitHub by an automated worker and was published only after approval by the IT and Security department of AT Medical GmbH, Heidelberg.
+
+Organization: AT Medical GmbH, Heidelberg
+Website: https://www.at-medical.de
+Contact: Support@at-medical.de
 ```
 
 German source version:
 
 ```text
 Transparenzhinweis: Hierbei handelt es sich um einen automatisch generierten Incident Report auf Grundlage einer realen Fehlerbehebung mithilfe von ChatGPT. Die Zusammenfassung wurde über GitHub durch einen automatisierten Worker erstellt und erst nach Freigabe durch die Abteilung IT und Sicherheit der AT Medical GmbH, Heidelberg veröffentlicht.
+
+Organisation: AT Medical GmbH, Heidelberg
+Webseite: https://www.at-medical.de
+Kontakt: Support@at-medical.de
 ```
 
 ## Draft Post
@@ -81,9 +94,19 @@ What to change to avoid this recurring.
 
 Full write-up: [link to public report]
 
+## Footer / Contact
+
+```text
+Organization: AT Medical GmbH, Heidelberg
+Website: https://www.at-medical.de
+Contact: Support@at-medical.de
+```
+
 ## Review Checklist
 
 - [ ] Mandatory transparency disclaimer included
+- [ ] Website and contact address included
+- [ ] Link to full public GitHub report included
 - [ ] No real IPs
 - [ ] No real hostnames/domains unless intentionally public
 - [ ] No secrets/tokens
