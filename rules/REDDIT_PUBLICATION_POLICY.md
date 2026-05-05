@@ -4,6 +4,24 @@
 
 This policy defines how sanitized public reports may be prepared and later published to Reddit.
 
+## Mandatory Transparency Disclaimer
+
+Every Reddit post generated from an ATMED public incident report must include the following disclaimer either at the beginning or as a footer.
+
+Preferred English version:
+
+```text
+Transparency note: This is an automatically generated incident report based on a real troubleshooting and remediation process performed with the assistance of ChatGPT. The summary was generated and prepared through GitHub by an automated worker and was published only after approval by the IT and Security department of AT Medical GmbH, Heidelberg.
+```
+
+German source version:
+
+```text
+Transparenzhinweis: Hierbei handelt es sich um einen automatisch generierten Incident Report auf Grundlage einer realen Fehlerbehebung mithilfe von ChatGPT. Die Zusammenfassung wurde über GitHub durch einen automatisierten Worker erstellt und erst nach Freigabe durch die Abteilung IT und Sicherheit der AT Medical GmbH, Heidelberg veröffentlicht.
+```
+
+The Reddit worker must refuse publication if the disclaimer is missing.
+
 ## Recommendation
 
 Do **not** store a Reddit username and password in GitHub Secrets.
@@ -30,6 +48,7 @@ Storing a Reddit password in GitHub Secrets is not recommended because:
 ATMED-public-reports Reddit draft
   -> approval_status / reddit.approved = true
   -> selected_subreddit set
+  -> disclaimer validation
   -> GitHub Action or VPS worker reads draft
   -> Reddit API OAuth post
   -> posted URL written back to draft/report
@@ -78,6 +97,7 @@ A Reddit draft must not be posted unless:
 reddit:
   approved: true
   selected_subreddit: "r/..."
+mandatory_disclaimer: true
 ```
 
 and the sanitization checklist is complete.
@@ -91,7 +111,7 @@ hashtags:
   - "#Mailcow"
   - "#Docker"
   - "#iptables"
-
+mandatory_disclaimer: true
 reddit:
   status: "draft"
   approved: false
@@ -107,11 +127,12 @@ reddit:
 When approved, a worker may:
 
 1. validate sanitization metadata,
-2. validate selected subreddit,
-3. submit the post via Reddit API,
-4. store the posted URL in the draft metadata or a publication log,
-5. notify Andreas via NTFY.
+2. validate mandatory disclaimer is present,
+3. validate selected subreddit,
+4. submit the post via Reddit API,
+5. store the posted URL in the draft metadata or a publication log,
+6. notify Andreas via NTFY.
 
 ## Final Rule
 
-Prepare automatically. Publish only after explicit approval.
+Prepare automatically. Publish only after explicit approval. Never publish without the mandatory transparency disclaimer.
