@@ -8,6 +8,9 @@ source_public_report: "[path or URL]"
 category: "[mail | docker | cloudflare | traefik | linux | monitoring | other]"
 tags:
   - "[tag]"
+hashtags:
+  - "#[Tag]"
+mandatory_disclaimer: true
 reddit:
   status: "draft"
   approved: false
@@ -31,7 +34,23 @@ reddit:
 | 2 | r/... | |
 | 3 | r/... | |
 
+## Mandatory Transparency Disclaimer
+
+This text must appear either at the beginning or as a footer of every Reddit post:
+
+```text
+Transparency note: This is an automatically generated incident report based on a real troubleshooting and remediation process performed with the assistance of ChatGPT. The summary was generated and prepared through GitHub by an automated worker and was published only after approval by the IT and Security department of AT Medical GmbH, Heidelberg.
+```
+
+German source version:
+
+```text
+Transparenzhinweis: Hierbei handelt es sich um einen automatisch generierten Incident Report auf Grundlage einer realen Fehlerbehebung mithilfe von ChatGPT. Die Zusammenfassung wurde über GitHub durch einen automatisierten Worker erstellt und erst nach Freigabe durch die Abteilung IT und Sicherheit der AT Medical GmbH, Heidelberg veröffentlicht.
+```
+
 ## Draft Post
+
+[Insert mandatory transparency disclaimer here, either at the beginning or as a footer.]
 
 I ran into a technical issue that may be useful for others troubleshooting a similar setup.
 
@@ -64,6 +83,7 @@ Full write-up: [link to public report]
 
 ## Review Checklist
 
+- [ ] Mandatory transparency disclaimer included
 - [ ] No real IPs
 - [ ] No real hostnames/domains unless intentionally public
 - [ ] No secrets/tokens
@@ -72,3 +92,4 @@ Full write-up: [link to public report]
 - [ ] No sensitive security architecture details
 - [ ] Subreddit rules checked
 - [ ] Approved by Andreas
+- [ ] Approved by IT and Security
