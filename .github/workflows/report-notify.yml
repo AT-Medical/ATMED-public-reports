@@ -1,0 +1,52 @@
+name: Report notification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'incident-reports/**/*.md'
+      - 'reddit-drafts/**/*.md'
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Notify
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=$(git diff --name-only HEAD~1 HEAD -- 'incident-reports/**/*.md' 'reddit-drafts/**/*.md' | head -n 1 || true)
+          [ -n "$FILE" ] || exit 0
+          TITLE=$(awk 'BEGIN{y=0} /^---[[:space:]]*$/{y=!y; next} y && /^title:[[:space:]]*/{sub(/^title:[[:space:]]*/,""); gsub(/^\"|\"$/,""); print; exit}' "$FILE" 2>/dev/null || true)
+          [ -n "$TITLE" ] || TITLE=$(basename "$FILE" .md)
+          LINK="https://github.com/${{ github.repository }}/blob/main/${FILE}"
+          if [[ "$FILE" == reddit-drafts/* ]]; then
+            PREFIX="🌐 Neuer Reddit-Bericht:"
+            NTITLE="Reddit-Bericht"
+            TAGS="globe,clipboard"
+          else
+            PREFIX="📋 Neuer öffentlicher Report:"
+            NTITLE="Öffentlicher Report"
+            TAGS="clipboard,white_check_mark"
+          fi
+          MSG="${PREFIX}
+${TITLE}
+
+GitHub-Link: ${LINK}"
+          python3 - <<PY
+import urllib.request
+msg = '''$MSG'''.encode('utf-8')
+req = urllib.request.Request('https://ntfy.at-medical.de/atmed-github', data=msg, method='POST')
+req.add_header('Title', '''$NTITLE''')
+req.add_header('Tags', '''$TAGS''')
+req.add_header('Priority', '3')
+req.add_header('Click', '$LINK')
+urllib.request.urlopen(req, timeout=15).read()
+PY
