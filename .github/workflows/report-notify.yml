@@ -1,11 +1,11 @@
-name: Report notification
+name: Notify public reports via ntfy
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'incident-reports/**/*.md'
-      - 'reddit-drafts/**/*.md'
+    branches:
+      - main
+      - master
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,35 +18,45 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Notify
+      - name: Build notification
+        id: msg
         shell: bash
         run: |
           set -euo pipefail
           FILE=$(git diff --name-only HEAD~1 HEAD -- 'incident-reports/**/*.md' 'reddit-drafts/**/*.md' | head -n 1 || true)
-          [ -n "$FILE" ] || exit 0
+          if [ -z "$FILE" ]; then
+            echo "send=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           TITLE=$(awk 'BEGIN{y=0} /^---[[:space:]]*$/{y=!y; next} y && /^title:[[:space:]]*/{sub(/^title:[[:space:]]*/,""); gsub(/^\"|\"$/,""); print; exit}' "$FILE" 2>/dev/null || true)
           [ -n "$TITLE" ] || TITLE=$(basename "$FILE" .md)
           LINK="https://github.com/${{ github.repository }}/blob/main/${FILE}"
           if [[ "$FILE" == reddit-drafts/* ]]; then
-            PREFIX="🌐 Neuer Reddit-Bericht:"
-            NTITLE="Reddit-Bericht"
-            TAGS="globe,clipboard"
+            PREFIX="Neuer Reddit-Bericht:"
+            KIND="Reddit-Bericht"
           else
-            PREFIX="📋 Neuer öffentlicher Report:"
-            NTITLE="Öffentlicher Report"
-            TAGS="clipboard,white_check_mark"
+            PREFIX="Neuer oeffentlicher Report:"
+            KIND="Oeffentlicher Report"
           fi
-          MSG="${PREFIX}
+          BODY="${PREFIX}
 ${TITLE}
 
 GitHub-Link: ${LINK}"
-          python3 - <<PY
-import urllib.request
-msg = '''$MSG'''.encode('utf-8')
-req = urllib.request.Request('https://ntfy.at-medical.de/atmed-github', data=msg, method='POST')
-req.add_header('Title', '''$NTITLE''')
-req.add_header('Tags', '''$TAGS''')
-req.add_header('Priority', '3')
-req.add_header('Click', '$LINK')
-urllib.request.urlopen(req, timeout=15).read()
-PY
+          echo "send=true" >> "$GITHUB_OUTPUT"
+          echo "title=$KIND" >> "$GITHUB_OUTPUT"
+          echo "link=$LINK" >> "$GITHUB_OUTPUT"
+          echo "body<<EOF" >> "$GITHUB_OUTPUT"
+          printf '%b\n' "$BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Send notification
+        if: steps.msg.outputs.send == 'true'
+        shell: bash
+        env:
+          NTFY_URL: ${{ secrets.ATMED_NTFY_URL }}
+          NTFY_USER: ${{ secrets.ATMED_NTFY_USER }}
+          NTFY_PASS: ${{ secrets.ATMED_NTFY_PASS }}
+          NTFY_TOPIC: atmed-github
+        run: |
+          set -euo pipefail
+          curl -fsS -u "$NTFY_USER:$NTFY_PASS" -H "Title: ${{ steps.msg.outputs.title }}" -H "Priority: default" -H "Click: ${{ steps.msg.outputs.link }}" -d "${{ steps.msg.outputs.body }}" "${NTFY_URL%/}/$NTFY_TOPIC"
