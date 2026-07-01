@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - master
+    paths:
+      - 'incident-reports/**/*.md'
+      - 'reddit-drafts/**/*.md'
+      - '.github/workflows/report-notify.yml'
   workflow_dispatch:
 
 permissions:
@@ -12,9 +16,12 @@ permissions:
 
 jobs:
   notify:
+    name: Send public report notification
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           fetch-depth: 2
 
@@ -23,14 +30,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          FILE=$(git diff --name-only HEAD~1 HEAD -- 'incident-reports/**/*.md' 'reddit-drafts/**/*.md' | head -n 1 || true)
+
+          FILE=""
+          if git rev-parse HEAD~1 >/dev/null 2>&1; then
+            FILE="$(git diff --name-only HEAD~1 HEAD -- 'incident-reports/**/*.md' 'reddit-drafts/**/*.md' | head -n 1 || true)"
+          fi
+
+          if [ -z "$FILE" ] && [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            FILE="$(git ls-files 'incident-reports/**/*.md' 'reddit-drafts/**/*.md' | head -n 1 || true)"
+          fi
+
           if [ -z "$FILE" ]; then
+            echo "No public report file changed. Nothing to notify."
             echo "send=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          TITLE=$(awk 'BEGIN{y=0} /^---[[:space:]]*$/{y=!y; next} y && /^title:[[:space:]]*/{sub(/^title:[[:space:]]*/,""); gsub(/^\"|\"$/,""); print; exit}' "$FILE" 2>/dev/null || true)
-          [ -n "$TITLE" ] || TITLE=$(basename "$FILE" .md)
-          LINK="https://github.com/${{ github.repository }}/blob/main/${FILE}"
+
+          TITLE="$(awk 'BEGIN{y=0} /^---[[:space:]]*$/{y=!y; next} y && /^title:[[:space:]]*/{sub(/^title:[[:space:]]*/,""); gsub(/^\"|\"$/,""); print; exit}' "$FILE" 2>/dev/null || true)"
+          [ -n "$TITLE" ] || TITLE="$(basename "$FILE" .md)"
+
+          LINK="https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/${FILE}"
           if [[ "$FILE" == reddit-drafts/* ]]; then
             PREFIX="Neuer Reddit-Bericht:"
             KIND="Reddit-Bericht"
@@ -38,16 +57,20 @@ jobs:
             PREFIX="Neuer oeffentlicher Report:"
             KIND="Oeffentlicher Report"
           fi
+
           BODY="${PREFIX}
 ${TITLE}
 
 GitHub-Link: ${LINK}"
-          echo "send=true" >> "$GITHUB_OUTPUT"
-          echo "title=$KIND" >> "$GITHUB_OUTPUT"
-          echo "link=$LINK" >> "$GITHUB_OUTPUT"
-          echo "body<<EOF" >> "$GITHUB_OUTPUT"
-          printf '%b\n' "$BODY" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "send=true"
+            echo "title=$KIND"
+            echo "link=$LINK"
+            echo "body<<EOF"
+            printf '%b\n' "$BODY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Send notification
         if: steps.msg.outputs.send == 'true'
@@ -59,4 +82,19 @@ GitHub-Link: ${LINK}"
           NTFY_TOPIC: atmed-github
         run: |
           set -euo pipefail
-          curl -fsS -u "$NTFY_USER:$NTFY_PASS" -H "Title: ${{ steps.msg.outputs.title }}" -H "Priority: default" -H "Click: ${{ steps.msg.outputs.link }}" -d "${{ steps.msg.outputs.body }}" "${NTFY_URL%/}/$NTFY_TOPIC"
+
+          if [ -z "${NTFY_URL:-}" ] || [ -z "${NTFY_USER:-}" ] || [ -z "${NTFY_PASS:-}" ]; then
+            echo "::warning title=ntfy notification skipped::ATMED_NTFY_URL, ATMED_NTFY_USER or ATMED_NTFY_PASS is missing."
+            exit 0
+          fi
+
+          if ! curl -fsS --retry 2 --connect-timeout 10 --max-time 20 \
+            -u "$NTFY_USER:$NTFY_PASS" \
+            -H "Title: ${{ steps.msg.outputs.title }}" \
+            -H "Priority: default" \
+            -H "Click: ${{ steps.msg.outputs.link }}" \
+            -d "${{ steps.msg.outputs.body }}" \
+            "${NTFY_URL%/}/$NTFY_TOPIC"; then
+            echo "::warning title=ntfy notification failed::Notification delivery failed, but report workflow remains green."
+            exit 0
+          fi
