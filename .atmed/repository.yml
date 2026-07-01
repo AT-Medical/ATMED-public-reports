@@ -1,0 +1,48 @@
+version: 1
+repository:
+  name: ATMED-public-reports
+  owner: AT-Medical-GmbH
+  class: reports-public
+  lifecycle: active
+  service: reporting
+  visibility: public
+  data_class: public
+  owner_team: governance-team
+  technical_owner: devops-team
+  dashboard: true
+  deployable: false
+  reports:
+    private: false
+    public: true
+  central_tracking_issue: AT-Medical-GmbH/github-governance#26
+  rollout_issue: AT-Medical-GmbH/ATMED-public-reports#3
+
+purpose:
+  summary: Public report repository for redacted and externally shareable AT Medical GitHub ecosystem summaries.
+  belongs_here:
+    - public completion summaries
+    - public review summaries
+    - public PR summaries
+    - externally shareable case-style summaries
+    - public migration notes
+  excluded:
+    - internal-only report material
+    - operational details not intended for publication
+    - service source code
+    - raw notes
+    - non-redacted drafts
+
+structure:
+  proposed_root:
+    - reports
+    - docs
+    - indexes
+
+governance:
+  standard_source: AT-Medical-GmbH/github-governance
+  rollout_mode: report-only
+  dashboard_standard: standards/readme-dashboard-standard.md
+  label_standard: standards/label-standard.yml
+  branch_standard: standards/branch-standard.md
+  ai_review_standard: standards/ai-review-standard.md
+  report_standard: standards/report-standard.md
